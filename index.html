@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mohd Asif Ahmed !</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=New+Tegomin&display=swap');
+        * {
+            padding: 0;
+            margin: 0;
+            box-sizing: border-box;
+        }
+        
+        .body {
+            background: url("../img/space.jpg");
+            min-height: 100vh;
+            background-size: 100vw 100vh;
+            background-repeat: no-repeat;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #scoreBox {
+            position: absolute;
+            top: 430px;
+            right: 50px;
+            font-size: 39px;
+            font-weight: bold;
+            font-family:'Times New Roman', Times, serif;
+            background-color: rgb(20, 133, 232);
+        }
+
+        #hiscoreBox {
+            position: absolute;
+            top: 550px;
+            right: 110px;
+            font-size: 30px;
+            font-weight: bold;
+            font-family:'Times New Roman', Times, serif;
+            background-color: rgb(231, 5, 5);
+        }
+
+        #board {
+            background: linear-gradient(rgb(235, 234, 231), rgb(236, 236, 167));
+            width: 90vmin;
+            height: 92vmin;
+            border: 2px solid rgb(3, 3, 0);
+            display: grid;
+            grid-template-rows: repeat(18, 1fr);
+            grid-template-columns: repeat(18, 1fr);
+            position: relative; 
+        }
+
+        .head {
+            background: linear-gradient(rgb(226, 12, 12), rgb(227, 227, 25));
+            border: 2px solid rgb(38, 178, 224);
+            transform: scale(1.02);
+            border-radius: 9px;
+        }
+
+        .snake {
+            background-color: rgb(58, 13, 224);
+            border: .25vmin solid white;
+            border-radius: 12px;
+        }
+
+        .food {
+            background: linear-gradient(rgb(241, 238, 238), rgb(228, 224, 228));
+            border: .25vmin solid black;
+            border-radius: 50px;
+        }
+        .snake {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background-color: rgb(58, 13, 224);
+            border-radius: 50%;
+            animation: moveBody 2s linear infinite;
+        }
+
+        @keyframes moveBody {
+            0% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(20px);
+            }
+            100% {
+                transform: translateY(0);
+            }
+        }
+
+        .snake-head {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background-color: rgb(58, 13, 224);
+            border-radius: 50%;
+            z-index: 1;
+        }
+
+        .snake-eye {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background-color: white;
+            border-radius: 50%;
+            top: 8px;
+            left: 8px;
+        }
+
+        .snake-tongue {
+            position: absolute;
+            width: 8px;
+            height: 18px;
+            background-color: red;
+            border-radius: 10px;
+            top: 22px;
+            left: 11px;
+            transform-origin: bottom;
+            animation: wagTongue 2s infinite ease-in-out;
+        }
+
+        @keyframes wagTongue {
+            0%, 100% {
+                transform: rotateZ(20deg);
+            }
+            50% {
+                transform: rotateZ(-20deg);
+            }
+        }
+    </style>
+</head>
+<body>
+<div>
+    <center><h1> FEED The SNAKE </h1></center>
+    <center><p> By Mohd Asif Ahmed</p></center>
+</div>
+<div class="body">
+    <div id="scoreBox">Present Score: 0</div>
+    <div id="hiscoreBox">Highest Score: 0</div>
+    <div id="board"></div>
+</div>
+<script>
+    let inputDir = {x: 0, y: 0};
+    const foodSound = new Audio('music/food.mp3');
+    const gameOverSound = new Audio('music/gameover.mp3');
+    const moveSound = new Audio('music/move.mp3');
+    const musicSound = new Audio('music/asif.mp3');
+    let speed = 19;
+    let score = 0;
+    let lastPaintTime = 0;
+    let snakeArr = [
+        {x: 13, y: 15}
+    ];
+
+    food = {x: 6, y: 7};
+
+    function main(ctime) {
+        window.requestAnimationFrame(main);
+        if ((ctime - lastPaintTime) / 1000 < 1 / speed) {
+            return;
+        }
+        lastPaintTime = ctime;
+        gameEngine();
+    }
+
+    function isCollide(snake) {
+
+        for (let i = 1; i < snakeArr.length; i++) {
+            if (snake[i].x === snake[0].x && snake[i].y === snake[0].y) {
+                return true;
+            }
+        }
+
+        if (snake[0].x >= 18 || snake[0].x <= 0 || snake[0].y >= 18 || snake[0].y <= 0) {
+            return true;
+        }
+
+        return false;
+    }
+
+    function gameEngine() {
+        if (isCollide(snakeArr)) {
+            gameOverSound.play();
+            musicSound.pause();
+            inputDir = {x: 0, y: 0};
+            alert("Game Over !");
+            snakeArr = [{x: 13, y: 15}];
+            musicSound.play();
+            score = 0;
+        }
+
+        if (snakeArr[0].y === food.y && snakeArr[0].x === food.x) {
+            foodSound.play();
+            score += 1;
+            if (score > hiscoreval) {
+                hiscoreval = score;
+                localStorage.setItem("Highest score", JSON.stringify(hiscoreval));
+                hiscoreBox.innerHTML = "Highest Score: " + hiscoreval;
+            }
+            scoreBox.innerHTML = " Present Score: " + score;
+            snakeArr.unshift({x: snakeArr[0].x + inputDir.x, y: snakeArr[0].y + inputDir.y});
+            let a = 2;
+            let b = 16;
+            food = {x: Math.round(a + (b - a) * Math.random()), y: Math.round(a + (b - a) * Math.random())}
+        }
+
+        for (let i = snakeArr.length - 2; i >= 0; i--) {
+            snakeArr[i + 1] = {...snakeArr[i]};
+        }
+
+        snakeArr[0].x += inputDir.x;
+        snakeArr[0].y += inputDir.y;
+
+        board.innerHTML = "";
+        snakeArr.forEach((e, index) => {
+            let snakeElement = document.createElement('div');
+            snakeElement.style.gridRowStart = e.y;
+            snakeElement.style.gridColumnStart = e.x;
+
+            if (index === 0) {
+                snakeElement.classList.add('snake-head');
+                let eye1 = document.createElement('div');
+                eye1.classList.add('snake-eye');
+                snakeElement.appendChild(eye1);
+                let eye2 = document.createElement('div');
+                eye2.classList.add('snake-eye');
+                eye2.style.left = '14px';
+                snakeElement.appendChild(eye2);
+                let tongue = document.createElement('div');
+                tongue.classList.add('snake-tongue');
+                snakeElement.appendChild(tongue);
+            } else {
+                snakeElement.classList.add('snake');
+            }
+            board.appendChild(snakeElement);
+        });
+
+        let foodElement = document.createElement('div');
+        foodElement.style.gridRowStart = food.y;
+        foodElement.style.gridColumnStart = food.x;
+        foodElement.classList.add('food');
+        board.appendChild(foodElement);
+    }
+
+    musicSound.play();
+    let hiscore = localStorage.getItem("Highest score");
+    if (hiscore === null) {
+        hiscoreval = 0;
+        localStorage.setItem("Highest score", JSON.stringify(hiscoreval))
+    } else {
+        hiscoreval = JSON.parse(hiscore);
+        hiscoreBox.innerHTML = "Highest Score: " + hiscore;
+    }
+
+    window.requestAnimationFrame(main);
+    window.addEventListener('keydown', e => {
+        inputDir = {x: 0, y: 1};
+        moveSound.play();
+        switch (e.key) {
+            case "ArrowUp":
+                console.log("ArrowUp");
+                inputDir.x = 0;
+                inputDir.y = -1;
+                break;
+
+            case "ArrowDown":
+                console.log("ArrowDown");
+                inputDir.x = 0;
+                inputDir.y = 1;
+                break;
+
+            case "ArrowLeft":
+                console.log("ArrowLeft");
+                inputDir.x = -1;
+                inputDir.y = 0;
+                break;
+
+            case "ArrowRight":
+                console.log("ArrowRight");
+                inputDir.x = 1;
+                inputDir.y = 0;
+                break;
+            default:
+                break;
+        }
+    });
+</script>
+</body>
+</html>
